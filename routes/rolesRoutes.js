@@ -1,10 +1,11 @@
 import { Router } from "express";
+import RoleController from "../controllers/RoleController.js";
 
 const rolesRoutes = Router();
 
-rolesRoutes.get("/", (req, res)=>{
-     res.send("res desde rolesRoutes")
-})
+const roleController = new RoleController();
+
+rolesRoutes.get("/", roleController.getAllRoles);
 
 
 export default rolesRoutes;
