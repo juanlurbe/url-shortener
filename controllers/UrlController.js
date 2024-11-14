@@ -13,7 +13,7 @@ class UrlController {
     }
   };
 
-  
+    
   getUrlById = async (req, res) => {
     try {
       const { id } = req.params;
@@ -30,8 +30,8 @@ class UrlController {
   
   createUrl = async (req, res) => {
     try {
-      const { urlLarga } = req.body;
-      const data = await this.urlService.createUrlService({ urlLarga });
+      const { longUrl } = req.body;
+      const data = await this.urlService.createUrlService({ longUrl });
       res.status(201).send({ success: true, data });
     } catch (error) {
       res.status(400).send({ success: false, message: error.message });
@@ -42,8 +42,8 @@ class UrlController {
   updateUrl = async (req, res) => {
     try {
       const { id } = req.params;
-      const { urlLarga } = req.body;
-      const data = await this.urlService.updateUrlService({ id, urlLarga });
+      const { longUrl } = req.body;
+      const data = await this.urlService.updateUrlService({ id, longUrl });
       if (!data) {
         return res.status(404).send({ success: false, message: "URL no encontrada" });
       }

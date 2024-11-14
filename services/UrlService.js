@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import validator from "validator";
 
 class UrlService {
-  // Obtener todas las URLs
+  
   getAllUrlsService = async () => {
     try {
       const urls = await Url.findAll();
@@ -13,7 +13,7 @@ class UrlService {
     }
   };
 
-  // Obtener una URL por ID
+
   getUrlByIdService = async (id) => {
     try {
       const url = await Url.findByPk(id);
@@ -24,45 +24,44 @@ class UrlService {
     }
   };
 
-  // Crear una nueva URL (acortar URL)
+  
   createUrlService = async (urlData) => {
     try {
-      const { urlLarga } = urlData;
+      const { longUrl, UserId } = urlData;
 
-      // Validar que urlLarga es una URL válida
-      if (!validator.isURL(urlLarga, { protocols: ["http", "https"], require_protocol: true })) {
+      
+      if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
         throw new Error("URL inválida");
       }
 
-      // Generar un código único para la URL corta
-      let urlCorta;
       let exists;
+      let shortUrl;      
       do {
-        urlCorta = nanoid(7);
-        exists = await Url.findOne({ where: { urlCorta } });
+        shortUrl = nanoid(7);
+        exists = await Url.findOne({ where: { shortUrl } });
       } while (exists);
 
-      // Crear la nueva URL en la base de datos
-      const newUrl = await Url.create({ urlLarga, urlCorta });
+      
+      const newUrl = await Url.create({ longUrl, shortUrl, UserId });
       return newUrl;
     } catch (error) {
       throw error;
     }
   };
 
-  // Actualizar una URL existente
+  
   updateUrlService = async (data) => {
     try {
-      const { id, urlLarga } = data;
+      const { id, longUrl } = data;
 
-      // Validar que urlLarga es una URL válida
-      if (!validator.isURL(urlLarga, { protocols: ["http", "https"], require_protocol: true })) {
+      
+      if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
         throw new Error("URL inválida");
       }
 
-      // Actualizar la URL en la base de datos
+      
       const [updatedRows] = await Url.update(
-        { urlLarga },
+        { longUrl },
         {
           where: { id },
         }
@@ -72,7 +71,7 @@ class UrlService {
         throw new Error("URL no encontrada o no actualizada");
       }
 
-      // Opcionalmente, puedes devolver la URL actualizada
+     
       const updatedUrl = await Url.findByPk(id);
       return updatedUrl;
     } catch (error) {
@@ -80,7 +79,7 @@ class UrlService {
     }
   };
 
-  // Eliminar una URL
+  
   deleteUrlService = async (id) => {
     try {
       const deletedRows = await Url.destroy({

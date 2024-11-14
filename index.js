@@ -1,6 +1,7 @@
 import express from "express";
 import routes from "./routes/routes.js"
 import {notFound} from "./middlewares/notFound.js"
+import connection from "./connection/connection.js";
 import { SERVER_PORT } from "./config/config.js";
 
 const app = express();
@@ -12,8 +13,9 @@ app.use("/", routes);
 
 app.use(notFound);
 
-
+await connection.sync({ alter: true });
 
 app.listen(SERVER_PORT, () => {
-    console.log("Escuchando en puerto ${SERVER_PORT}");
+    console.log(`Escuchando en puerto ${ SERVER_PORT }`);
+    
 });
