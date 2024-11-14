@@ -13,24 +13,6 @@ class UrlService {
     }
   };
 
-  getLongUrlByShortUrl = async (shortUrl) => {
-    try {
-      const url = await Url.findOne({ where: { shortUrl } });
-      return url;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  
-  incrementClicks = async (shortUrl) => {
-    try {
-      await Url.increment('clics', { where: { shortUrl } });
-    } catch (error) {
-      throw error;
-    }
-  };
-
 
   getUrlByIdService = async (id) => {
     try {

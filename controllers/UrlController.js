@@ -13,24 +13,7 @@ class UrlController {
     }
   };
 
-  redirectToLongUrl = async (req, res) => {
-    try {
-      const { shortUrl } = req.params;
-      const data = await this.urlService.getLongUrlByShortUrl(shortUrl);
-      if (!data) {
-        return res.status(404).send({ success: false, message: "URL no encontrada" });
-      }
-
-      await this.urlService.incrementClicks(shortUrl);
-
-      res.redirect(data.longUrl);
-    } catch (error) {
-      res.status(500).send({ success: false, message: error.message });
-    }
-  };
-
-
-  
+    
   getUrlById = async (req, res) => {
     try {
       const { id } = req.params;

@@ -4,11 +4,9 @@ import UrlController from '../controllers/UrlController.js';
 const urlRoutes = Router();
 const urlController = new UrlController();
 
-urlRoutes.get('/:shortUrl', urlController.redirectToLongUrl);
-
 urlRoutes.get('/', urlController.getAllUrls);
 
-urlRoutes.get('/id/:id', urlController.getUrlById);
+urlRoutes.get('/:id', urlController.getUrlById);
 
 urlRoutes.post('/', urlController.createUrl);
 
