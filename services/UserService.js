@@ -1,43 +1,66 @@
 import { User } from "../models/models.js";
+import { genToken, verifyToken } from "../utils/token.js";
 
 class UserService {
+
   getAllUsersService = async () => {
     try {
       const users = await User.findAll({
         attributes: ["name", "mail"],
+        include: Role,
       });
       return users;
     } catch (error) {
       throw error;
     }
   };
+
   getUserByIdService = async (id) => {
     try {
-      const users = await User.findAll({
+      const user = await User.findAll({
         where: { id },
         attributes: ["name", "mail"],
       });
-      return users;
+      return user;
     } catch (error) {
       throw error;
     }
   };
+
   loginService = async (user) => {
     try {
       const { mail, pass } = user;
       const userLogin = await User.findOne({ where: { mail } });
-      if (!userLogin) throw new Error("No pasas");
+      if (!userLogin) throw new Error("User not found");
+      
       const comparePass = await userLogin.compare(pass);
-      // console.log(
-      //   `🚀 ~ UserService ~ loginService= ~ comparePass:`,
-      //   comparePass
-      // );
-      if (!comparePass) throw new Error("No pasas");
-      return userLogin;
+      if (!comparePass) throw new Error("User not found");
+
+      const payload = {
+        id: userLogin.id,
+        role: userLogin.RoleId,
+        mail: userLogin.mail,
+      }
+
+      const token = genToken(payload)
+
+      return token;
+
     } catch (error) {
       throw error;
     }
   };
+
+  me = async (token) => {
+    try {
+      const verify = verifyToken(token);
+      return verify.data;
+    } catch (error) {
+      
+    }
+  };
+
+
   createUserService = async (user) => {
     try {
       const newUser = await User.create(user);
@@ -64,6 +87,6 @@ class UserService {
   deleteUserService = async (id) => {
     return `deleteUserService ${id}`;
   };
-}
+};
 
 export default UserService;
