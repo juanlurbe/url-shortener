@@ -1,15 +1,29 @@
 import { Url } from "../models/models.js";
 import { nanoid } from "nanoid";
 import validator from "validator";
+import { ROLE_ADMIN, ROLE_USER } from "../config/config.js";
 
 class UrlService {
   
-  getAllUrlsService = async () => {
+  getAllUrlsService = async (id, role) => {
     try {
-      const urls = await Url.findAll();
-      return urls;
+        let urls;
+
+        if (role === ROLE_ADMIN) {
+            urls = await Url.findAll();
+        } else if (role === ROLE_USER) {
+            urls = await Url.findAll({
+                where: {
+                    UserId: id,
+                },
+            });
+        } else {
+            throw new Error("Rol no válido para listar URLs");
+        }
+
+        return urls;
     } catch (error) {
-      throw error;
+        throw error;
     }
   };
 
@@ -25,59 +39,71 @@ class UrlService {
   };
 
   
-  createUrlService = async (urlData) => {
+  createUrlService = async (longUrl, userId, baseUrl) => {
     try {
-      const { longUrl, UserId } = urlData;
+        
+        if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
+            throw new Error("Url inválida");
+        }
 
-      
-      if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
-        throw new Error("URL inválida");
-      }
+        let exists;
+        let shortUrl;
+        do {
+            shortUrl = nanoid(7);
+            exists = await Url.findOne({ where: { shortUrl } });
+        } while (exists);
 
-      let exists;
-      let shortUrl;      
-      do {
-        shortUrl = nanoid(7);
-        exists = await Url.findOne({ where: { shortUrl } });
-      } while (exists);
+        const newUrl = await Url.create({ longUrl, shortUrl, UserId: userId });
+        const fullShortUrl = `${baseUrl}/${shortUrl}`;
+        
+        //return newUrl;
+        return {
+          longUrl,
+          shortUrl: fullShortUrl
+        }
 
-      
-      const newUrl = await Url.create({ longUrl, shortUrl, UserId });
-      return newUrl;
     } catch (error) {
-      throw error;
+        throw error;
     }
   };
 
   
-  updateUrlService = async (data) => {
+  updateUrlService = async (id, longUrl, userId, baseUrl) => {
     try {
-      const { id, longUrl } = data;
-
-      
-      if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
-        throw new Error("URL inválida");
-      }
-
-      
-      const [updatedRows] = await Url.update(
-        { longUrl },
-        {
-          where: { id },
+        
+        if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
+            throw new Error("Url inválida");
         }
-      );
 
-      if (updatedRows === 0) {
-        throw new Error("URL no encontrada o no actualizada");
-      }
+        const url = await Url.findOne({ where: { id, UserId: userId } });
+        if (!url) {
+            throw new Error("Acceso denegado, la Url no te pertenece");
+        }
 
-     
-      const updatedUrl = await Url.findByPk(id);
-      return updatedUrl;
+        const [updatedRows] = await Url.update(
+            { longUrl },
+            {
+                where: { id, UserId: userId },
+            }
+        );
+
+        if (updatedRows === 0) {
+            throw new Error("Url no encontrada");
+        }
+
+        const updatedUrl = await Url.findByPk(id);
+        const fullShortUrl = `${baseUrl}/${updatedUrl.shortUrl}`;
+        
+        return {
+          longUrl,
+          shortUrl: fullShortUrl
+        };
+
     } catch (error) {
-      throw error;
+        throw error;
     }
   };
+
 
   
   deleteUrlService = async (id) => {

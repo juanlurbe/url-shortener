@@ -8,5 +8,5 @@ async function roleSeed() {
   }
 }
 
-roleSeed()
-// export default roleSeed;
+//roleSeed()
+ export default roleSeed;

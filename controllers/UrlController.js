@@ -6,7 +6,9 @@ class UrlController {
   
   getAllUrls = async (req, res) => {
     try {
-      const data = await this.urlService.getAllUrlsService();
+      const { id, role } = req.user;
+
+      const data = await this.urlService.getAllUrlsService(id, role);
       res.status(200).send({ success: true, data });
     } catch (error) {
       res.status(400).send({ success: false, message: error.message });
@@ -31,7 +33,11 @@ class UrlController {
   createUrl = async (req, res) => {
     try {
       const { longUrl } = req.body;
-      const data = await this.urlService.createUrlService({ longUrl });
+      const { id: userId } = req.user;
+
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+      const data = await this.urlService.createUrlService(longUrl, userId, baseUrl);
       res.status(201).send({ success: true, data });
     } catch (error) {
       res.status(400).send({ success: false, message: error.message });
@@ -41,17 +47,22 @@ class UrlController {
   
   updateUrl = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { longUrl } = req.body;
-      const data = await this.urlService.updateUrlService({ id, longUrl });
-      if (!data) {
-        return res.status(404).send({ success: false, message: "URL no encontrada" });
-      }
-      res.status(200).send({ success: true, message: "URL actualizada exitosamente" });
+        const { id } = req.params; 
+        const { longUrl } = req.body; 
+        const { id: userId } = req.user; 
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        
+        const data = await this.urlService.updateUrlService(id, longUrl, userId, baseUrl);
+        if (!data) {
+            return res.status(404).send({ success: false, message: "URL no encontrada" });
+        }
+
+        res.status(200).send({ success: true, message: "URL actualizada exitosamente", data });
     } catch (error) {
-      res.status(400).send({ success: false, message: error.message });
+        res.status(400).send({ success: false, message: error.message });
     }
   };
+
 
   
   deleteUrl = async (req, res) => {
