@@ -15,6 +15,7 @@ app.use("/", routes);
 
 app.use(notFound);
 
+//await connection.sync({ force: true });
 await connection.sync({ alter: true });
 
 app.listen(SERVER_PORT, () => {

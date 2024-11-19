@@ -1,4 +1,4 @@
-import { User } from "../models/models.js";
+import { User, Role } from "../models/models.js";
 import { genToken, verifyToken } from "../utils/token.js";
 
 class UserService {
@@ -30,7 +30,15 @@ class UserService {
   loginService = async (user) => {
     try {
       const { mail, pass } = user;
-      const userLogin = await User.findOne({ where: { mail } });
+
+      const userLogin = await User.findOne({ 
+        where: { mail },
+        include: {
+          model: Role, 
+          attributes: ["name"], 
+        },
+       });
+      
       if (!userLogin) throw new Error("User not found");
       
       const comparePass = await userLogin.compare(pass);
@@ -38,8 +46,9 @@ class UserService {
 
       const payload = {
         id: userLogin.id,
-        role: userLogin.RoleId,
+        role: userLogin.Role.name,
         mail: userLogin.mail,
+        
       }
 
       const token = genToken(payload)

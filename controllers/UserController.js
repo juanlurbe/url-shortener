@@ -1,3 +1,4 @@
+import { ROLE_ADMIN } from "../config/config.js";
 import UserService from "../services/UserService.js";
 
 
@@ -6,6 +7,14 @@ class UserController {
 
   getAllUsers = async (req, res) => {
     try {
+      const {role} = req.user;
+
+      if (role !== ROLE_ADMIN) {
+        const error = new Error("Acceso denegado, no puede listar todos los usuarios");
+        error.status = 403;
+        throw error;
+      }
+
       const data = await this.userService.getAllUsersService();
       res.status(200).send({ success: true, message: data });
     } catch (error) {
@@ -18,8 +27,17 @@ class UserController {
 
   getUserById = async (req, res) => {
     try {
-      const { id } = req.params;
-      const data = await this.userService.getUserByIdService(id);
+      const { id: userIdFromParams } = req.params;
+      const { id: userIdFromToken, role } = req.user;
+     
+      if(role !== ROLE_ADMIN && parseInt(userIdFromParams)!== userIdFromToken){
+        const error = new Error("Acceso denegado, no puede acceder a info de otro usuario ");
+        error.status = 403;
+        throw error;
+      }
+
+      const data = await this.userService.getUserByIdService(userIdFromParams);
+      
       res.status(200).send({ success: true, message: data });
     } catch (error) {
       res.status(400).send({ success: false, message: error.message });
@@ -61,7 +79,7 @@ class UserController {
     try {
       const { token } = req.cookies;
       const user = await this.userService.me(token);
-      
+            
       res.status(200).send({ success: true, message: user });
 
     } catch (error) {
