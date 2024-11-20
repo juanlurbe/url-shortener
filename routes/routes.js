@@ -6,10 +6,10 @@ import redirectionRoutes from "./redirectionRoutes.js";
 
 const routes = Router();
 
-routes.use("/", redirectionRoutes);
 routes.use("/roles", rolesRoutes);
 routes.use("/users", userRoutes);
 routes.use("/urls", urlRoutes);
+routes.use("/", redirectionRoutes);
 
 export default routes;
 
