@@ -104,7 +104,11 @@ class UserService {
         }
 
         const updatedUser = await User.findByPk(id);
-        return updatedUser;
+        // return updatedUser;
+        return {
+          mail: updatedUser.mail,
+          name: updatedUser.name
+        }
 
     } catch (error) {
         throw error;
