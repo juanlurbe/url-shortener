@@ -39,6 +39,7 @@ class UrlController {
 
       const data = await this.urlService.createUrlService(longUrl, userId, baseUrl);
       res.status(201).send({ success: true, data });
+
     } catch (error) {
       res.status(400).send({ success: false, message: error.message });
     }
@@ -67,16 +68,17 @@ class UrlController {
   
   deleteUrl = async (req, res) => {
     try {
-      const { id } = req.params;
-      const data = await this.urlService.deleteUrlService(id);
-      if (!data) {
-        return res.status(404).send({ success: false, message: "URL no encontrada" });
-      }
-      res.status(200).send({ success: true, message: "URL eliminada exitosamente" });
+        const { id } = req.params; 
+        const { id: userId } = req.user; 
+
+        const data = await this.urlService.deleteUrlService(id, userId);
+        res.status(200).send({ success: true, message: data });
+        
     } catch (error) {
-      res.status(400).send({ success: false, message: error.message });
+        res.status(400).send({ success: false, message: error.message });
     }
   };
+
 }
 
 export default UrlController;

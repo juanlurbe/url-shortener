@@ -4,6 +4,12 @@ import validator from "validator";
 import { ROLE_ADMIN, ROLE_USER } from "../config/config.js";
 
 class UrlService {
+
+    #validateUrl(longUrl) {
+        if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
+            throw new Error("Url inválida");
+        }
+    }
   
   getAllUrlsService = async (id, role) => {
     try {
@@ -42,9 +48,7 @@ class UrlService {
   createUrlService = async (longUrl, userId, baseUrl) => {
     try {
         
-        if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
-            throw new Error("Url inválida");
-        }
+        this.#validateUrl(longUrl);
 
         let exists;
         let shortUrl;
@@ -71,9 +75,7 @@ class UrlService {
   updateUrlService = async (id, longUrl, userId, baseUrl) => {
     try {
         
-        if (!validator.isURL(longUrl, { protocols: ["http", "https"], require_protocol: true })) {
-            throw new Error("Url inválida");
-        }
+        this.#validateUrl(longUrl);
 
         const url = await Url.findOne({ where: { id, UserId: userId } });
         if (!url) {
@@ -106,17 +108,23 @@ class UrlService {
 
 
   
-  deleteUrlService = async (id) => {
+  deleteUrlService = async (id, userId) => {
     try {
-      const deletedRows = await Url.destroy({
-        where: { id },
-      });
-      if (deletedRows === 0) {
-        throw new Error("URL no encontrada o no eliminada");
-      }
-      return `URL con id ${id} eliminada exitosamente`;
+        
+        const url = await Url.findOne({ where: { id, UserId: userId } });
+        if (!url) {
+            throw new Error("Acceso denegado, la url no te pertenece");
+        }
+
+       const deletedRows = await Url.destroy({ where: { id, UserId: userId } });
+        if (deletedRows === 0) {
+            throw new Error("Url no encontrada o no eliminada");
+        }
+
+        return `Url con id ${id} eliminada`;
+        
     } catch (error) {
-      throw error;
+        throw error;
     }
   };
 }
