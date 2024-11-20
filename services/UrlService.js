@@ -34,15 +34,24 @@ class UrlService {
   };
 
 
-  getUrlByIdService = async (id) => {
+  getUrlByIdService = async (id, userId, role) => {
     try {
-      const url = await Url.findByPk(id);
-      if (!url) throw new Error("URL no encontrada");
-      return url;
+        const url = await Url.findByPk(id);
+
+        if (!url) {
+            throw new Error("URL no encontrada");
+        }
+
+        if (role !== ROLE_ADMIN && url.UserId !== userId) {
+            throw new Error("Acceso denegado, no puedes acceder a esta url");
+        }
+
+        return url;
+
     } catch (error) {
-      throw error;
+        throw error;
     }
-  };
+};
 
   
   createUrlService = async (longUrl, userId, baseUrl) => {
@@ -77,34 +86,37 @@ class UrlService {
         
         this.#validateUrl(longUrl);
 
-        const url = await Url.findOne({ where: { id, UserId: userId } });
+        const url = await Url.findOne({ where: { id } });
         if (!url) {
-            throw new Error("Acceso denegado, la Url no te pertenece");
+            throw new Error("URL no encontrada");
+        }
+
+        if (url.UserId !== userId) {
+            throw new Error("Acceso denegado, no puedes actualizar esta URL");
         }
 
         const [updatedRows] = await Url.update(
             { longUrl },
-            {
-                where: { id, UserId: userId },
-            }
+            { where: { id, UserId: userId } } 
         );
 
         if (updatedRows === 0) {
-            throw new Error("Url no encontrada");
+            throw new Error("Error al actualizar la URL");
         }
 
         const updatedUrl = await Url.findByPk(id);
         const fullShortUrl = `${baseUrl}/${updatedUrl.shortUrl}`;
         
         return {
-          longUrl,
-          shortUrl: fullShortUrl
+            longUrl,
+            shortUrl: fullShortUrl,
         };
 
     } catch (error) {
         throw error;
     }
-  };
+    };
+
 
 
   

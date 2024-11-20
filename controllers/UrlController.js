@@ -18,14 +18,14 @@ class UrlController {
     
   getUrlById = async (req, res) => {
     try {
-      const { id } = req.params;
-      const data = await this.urlService.getUrlByIdService(id);
-      if (!data) {
-        return res.status(404).send({ success: false, message: "URL no encontrada" });
-      }
-      res.status(200).send({ success: true, data });
+        const { id } = req.params;
+        const { id: userId, role } = req.user; 
+
+        const data = await this.urlService.getUrlByIdService(id, userId, role);
+        res.status(200).send({ success: true, data });
+        
     } catch (error) {
-      res.status(400).send({ success: false, message: error.message });
+        res.status(error.status || 400).send({ success: false, message: error.message });
     }
   };
 
@@ -48,21 +48,20 @@ class UrlController {
   
   updateUrl = async (req, res) => {
     try {
-        const { id } = req.params; 
-        const { longUrl } = req.body; 
-        const { id: userId } = req.user; 
-        const baseUrl = `${req.protocol}://${req.get("host")}`;
-        
-        const data = await this.urlService.updateUrlService(id, longUrl, userId, baseUrl);
-        if (!data) {
-            return res.status(404).send({ success: false, message: "URL no encontrada" });
-        }
+        const { id } = req.params;
+        const { longUrl } = req.body;
+        const { id: userId, role } = req.user;
 
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+        const data = await this.urlService.updateUrlService(id, longUrl, userId, role, baseUrl);
+        
         res.status(200).send({ success: true, message: "URL actualizada exitosamente", data });
     } catch (error) {
         res.status(400).send({ success: false, message: error.message });
     }
-  };
+};
+
 
 
   
